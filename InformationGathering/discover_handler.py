@@ -4,12 +4,12 @@ Created on 12 Dec 2017
 @author: lia
 '''
 import threading, time, signal
-from socket import *
+from socket import socket, SOL_SOCKET, AF_INET, SO_REUSEADDR, SOCK_DGRAM
 
 
-from sender import Sender
+from discover_sender import Sender
 
-from listener import Listener
+from discover_listener import Listener
 from commons import GTP_C_PORT
 
 class MessageHandler(threading.Thread):
