@@ -4,10 +4,10 @@ Created on 12 Dec 2017
 @author: lia
 '''
 import threading
-import errno
-from socket import *
+from socket import socket, error, AF_INET, SOCK_DGRAM, timeout, errno
 import time
 from IPy import IP
+from gtp_v2_core.utilities.utilities import logNormal, logErr, logOk 
 
 from commons import GTP_C_PORT, message_queue
 
@@ -19,7 +19,7 @@ class Sender(threading.Thread):
                  msg_freq=1, wait_time=20):
         threading.Thread.__init__(self)
         
-        self.TAG_NAME = 'SENDER_LISTENER'
+        self.TAG_NAME = 'GTP SENDER'
         
         if messages is None or len(messages) == 0 :
             raise Exception("%s :: no messages" % (self.TAG_NAME))             
@@ -57,75 +57,84 @@ class Sender(threading.Thread):
     ##
     def run(self):
         self.is_running = True
-        
-        if self.is_verbose: 
-            print "\n--: Acting as SENDER :--"
+ 
+        logNormal("--: Acting as SENDER :--", verbose = self.is_verbose, 
+                   TAG = self.TAG_NAME)
                 
         if self.is_running and self.sock is not None:
             ''' Prepare the messages to send '''
-            if self.is_verbose: 
-                print "%s: Preparing GTP messages"%(self.TAG_NAME)
+
+            logNormal("Preparing GTP messages", verbose = self.is_verbose, 
+                   TAG = self.TAG_NAME)                
             mdatas = []
             if self.messages is not None and len(self.messages) > 0:
                 count = 0
                 for m in self.messages:
-                    print "preparing msg #%d - type %d"%(count, m.get_msg_type())
+                    logNormal("preparing msg #%d - type %d"%(count, 
+                        m.get_msg_type()), verbose = self.is_verbose, 
+                        TAG = self.TAG_NAME)                     
                     mdatas.append(m.get_message())
                     count += 1
             tot_count = len(mdatas)
-          
-            if self.is_verbose: 
-                print "%s: Prepared %d GTP messages"%(self.TAG_NAME, tot_count)
-                
-                ''' SENDS MESSAGES '''
+            logOk("Prepared %d GTP messages"%(tot_count), verbose = self.is_verbose, 
+                   TAG = self.TAG_NAME)                
+        
             curr_count = 1                    
-            #for data in mdatas:
+        
             for num, data in enumerate(mdatas):
-                if self.is_verbose:
-                    print ("%s: Sending message (#%d of %d)..."
-                            %(self.TAG_NAME,curr_count, tot_count))
+                logNormal("Sending message (#%d of %d)..."%(curr_count, 
+                        tot_count), verbose = self.is_verbose, 
+                        TAG = self.TAG_NAME)                     
                 for ip in self.peers:
-                    message_queue[ip.strNormal()] = {'msg_type' : self.messages[num],
-                                                    'reply' : 0} 
-                    try:                       
-                        sent_bytes = self.sock.sendto(data, (ip.strNormal(), GTP_C_PORT))
-                        if sent_bytes is not None and sent_bytes > 0:
-                            if self.is_verbose: 
-                                print "%s: Bytes sent to %s %d"%(self.TAG_NAME, 
-                                                                 ip.strNormal(),
-                                                                 sent_bytes)
+                    try: 
+                        ip_str = ip.strNormal()
+                        msg_info = {'reply' : 0}
+                        if self.messages[num].get_msg_type() == 32 :
+                            msg_info['local_teid'] = self.messages[num].get_fteid()
+                            
+                        msg_type = self.messages[num].get_msg_type()
+                        
+                        if not message_queue.has_key(ip_str) or \
+                            not message_queue[ip_str ].has_key(msg_type):
+                            message_queue[ip_str][msg_type] = [msg_info]
                         else:
-                            if self.is_verbose: 
-                                print "%s: NO bytes sent to %s"%(self.TAG_NAME,
-                                                                 ip.strNormal())
+                            message_queue[ip_str][msg_type].extend(
+                                msg_info) 
+                                           
+                        sent_bytes = self.sock.sendto(data, (ip_str, GTP_C_PORT))
+                        
+                        if sent_bytes is not None and sent_bytes > 0:
+                            info_msg = "Bytes sent to %s %d"%(ip_str, sent_bytes)
+                        else:
+                            info_msg = "NO bytes sent to %s"%(ip_str)
+                        logNormal(info_msg, verbose = self.is_verbose, 
+                                TAG = self.TAG_NAME)                              
                     except timeout, e:
-                        print "%s: TIMEOUT_ERROR : %s"%(self.TAG_NAME, e)
+                        logErr("%s TIMEOUT_ERROR"%(ip_str), TAG = self.TAG_NAME)                         
                         pass
                     except error, e:
                         if e.errno == errno.ECONNREFUSED:
-                            print "%s: %s CONNECTION_REFUSED: %s"%(self.TAG_NAME, 
-                                                                   ip.strNormal(),
-                                                                   e)
-                            pass
-                        if e.errno == errno.EBADFD:
-                            print "%s: %s BAD_FILE_DESCRIPTOR_ERROR: %s"%(self.TAG_NAME, 
-                                                                          ip.strNormal(),
-                                                                          e)
-                            break
+                            logErr("%s CONNECTION_REFUSED"%(ip_str), 
+                                TAG = self.TAG_NAME)                                   
+                        elif e.errno == errno.EBADFD:
+                            logErr("%s BAD_FILE_DESCRIPTOR_ERROR"%(ip_str), 
+                                TAG = self.TAG_NAME)     
+                            break                        
                         elif e.errno == errno.EPIPE:
-                            print "%s: %s BROKEN_PIPE_ERROR: %s"%(self.TAG_NAME, ip.strNormal(),
-                                                               e)
-                            break
+                            logErr("%s BROKEN_PIPE_ERROR"%(ip_str), 
+                                TAG = self.TAG_NAME)  
+                            break                           
                         elif e.errno == errno.ECONNRESET:
-                            print "%s: %s CONNECTION_RESET_ERROR: %s"%(self.TAG_NAME, 
-                                                                       ip.strNormal(),
-                                                                       e)
+                            logErr("%s CONNECTION_RESET_ERROR"%(ip_str), 
+                                TAG = self.TAG_NAME)                             
                         else:
-                            print "%s: %s UNKNOWN_ERROR: %s"%(self.TAG_NAME, ip.strNormal(),
-                                                           e)
-                            pass
+                            logErr("%s UNKNOWN_ERROR: %s"%(ip_str, e), 
+                                TAG = self.TAG_NAME)    
+                            break                         
+                        pass
                     except Exception, e:
-                        print "%s:GENERIC ERROR : %s"%(self.TAG_NAME, e)
+                        logErr("%s GENERIC ERROR : %s"%(ip_str, e), 
+                            TAG = self.TAG_NAME)                         
                         break                                 
                 curr_count += 1
                 time.sleep(self.msg_freq)                 
@@ -134,8 +143,9 @@ class Sender(threading.Thread):
                 stop_time = time.time()
                 hours, rem = divmod(stop_time - self.start_time, 3600)
                 minutes, seconds = divmod(rem, 60)
-                print "Elapsed time: {:0>2}:{:0>2}:{:05.4f}".format(
-                    int(hours), int(minutes), seconds)
+                logOk("Elapsed time: {:0>2}:{:0>2}:{:05.4f}".format(
+                    int(hours), int(minutes), seconds), verbose = self.is_verbose, 
+                   TAG = self.TAG_NAME)
 
                         
                 
@@ -146,9 +156,6 @@ class Sender(threading.Thread):
     ##
     def stop(self):
         if not self.is_running:
-            return
-        
+            return        
         self.is_running = False
-        
-        if self.is_verbose: 
-            print "%s: Stopped"%(self.TAG_NAME)
+        logOk("Stopped", verbose = self.is_verbose, TAG = self.TAG_NAME)
