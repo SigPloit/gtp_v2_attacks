@@ -21,7 +21,7 @@ import sys
 from optparse import OptionParser
 from gtp_v2_core.utilities.configuration_parser import parseConfigs
 
-from handler import MessageHandler
+from discover_handler import MessageHandler
 
 from commons import message_queue
 
@@ -98,15 +98,11 @@ def main(argv=None):
         print "Sent %d GTPV2 messages"%len(message_queue)
         if not listening_mode :
             return
-        count = 0
         for key, value in message_queue.items():
-            if value['reply'] == 1:
-                print "%s implements a GTP v2 stack"%key
-                count += 1
-        if count > 0 :
-            print "Found in total %d targets implemeting a GTP v2 stack"%count
-        else :
-            print "Not found targets implemeting a GTP v2 stack"        
+            for k, v in value:
+                if v['reply'] == 1:
+                    print "%s implements a GTP v2 stack"%key
+                    print "%d msg type teid %d"%(k, v['remote_teid'])       
     except Exception, e:
         indent = len(program_name) * " "
         sys.stderr.write(program_name + ": " + repr(e) + "\n")

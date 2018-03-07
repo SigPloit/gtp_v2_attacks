@@ -90,7 +90,7 @@ class Listener(threading.Thread):
                         sequence_or_teid :
                         continue  
                     message_queue[addr[0]][req_msg_type]['remote_teid'] = \
-                    self.__getIE(data[12:])
+                    self.__getFTEID(data[12:])
             except timeout, e:
                 if addr[0] :
                     logErr("%s TIMEOUT_ERROR"%(addr[0]), TAG = self.TAG_NAME)
