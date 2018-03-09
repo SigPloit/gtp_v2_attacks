@@ -23,7 +23,7 @@ from gtp_v2_core.utilities.configuration_parser import parseConfigs
 
 from handler import MessageHandler
 
-from commons import message_queue
+from commons.globals import message_queue
 
 
 __all__ = []

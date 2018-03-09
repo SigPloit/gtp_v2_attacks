@@ -10,8 +10,7 @@ from socket import socket, timeout, error
 
 from gtp_v2_core.commons.gtp_v2_commons import GTPmessageTypeStr
 
-from gtp_v2_attacks.InformationGathering.commons import message_queue,\
-    GTPResponse2Request
+from commons.globals import message_queue, GTPResponse2Request
 from gtp_v2_core.utilities.utilities import logNormal, logErr, logOk , logWarn
 
 class Listener(threading.Thread):

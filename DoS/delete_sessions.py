@@ -20,11 +20,8 @@ import os
 import sys
 from optparse import OptionParser
 from gtp_v2_core.utilities.configuration_parser import parseConfigs
-
 from commons.message_handler import MessageHandler
-
 from commons.globals import message_queue
-
 
 __all__ = []
 __version__ = 0.1
@@ -62,7 +59,8 @@ def main(argv=None):
                           action = "count", help = "start also a GTP_C listener")       
         
         # set defaults
-        parser.set_defaults(listening_mode=False, config_file="../config/EchoRequest.cnf", 
+        parser.set_defaults(listening_mode=False,
+                            config_file="../config/DeleteSession.cnf", 
                             verbose = False)
 
         # process options
@@ -96,13 +94,7 @@ def main(argv=None):
             lstn.join()
             lstn.stop()
         print "Sent %d GTPV2 messages"%len(message_queue)
-        if not listening_mode :
-            return
-        for key, value in message_queue.items():
-            for k, v in value:
-                if v['reply'] == 1:
-                    print "%s implements a GTP v2 stack"%key
-                    print "%d msg type teid %d"%(k, v['remote_teid'])       
+       
     except Exception, e:
         indent = len(program_name) * " "
         sys.stderr.write(program_name + ": " + repr(e) + "\n")

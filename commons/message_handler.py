@@ -7,10 +7,10 @@ import threading, time, signal
 from socket import socket, SOL_SOCKET, AF_INET, SO_REUSEADDR, SOCK_DGRAM
 
 
-from discover_sender import Sender
+from commons.sender import Sender
 
-from discover_listener import Listener
-from commons import GTP_C_PORT
+from commons.listener import Listener
+from commons.globals import GTP_C_PORT
 
 class MessageHandler(threading.Thread):
     def __init__(self, peer, messages, isVerbose = True, listening_mode = False,

@@ -9,7 +9,7 @@ import time
 from IPy import IP
 from gtp_v2_core.utilities.utilities import logNormal, logErr, logOk 
 
-from commons import GTP_C_PORT, message_queue
+from commons.globals import GTP_C_PORT, message_queue
 
 class Sender(threading.Thread):
     '''
@@ -88,12 +88,12 @@ class Sender(threading.Thread):
                 for ip in self.peers:
                     try: 
                         ip_str = ip.strNormal()
-                        msg_info = {'reply' : 0}
-                        if self.messages[num].get_msg_type() == 32 :
-                            msg_info['local_teid'] = self.messages[num].get_fteid()
-                            
+                        msg_info = {'reply' : 0} 
                         msg_type = self.messages[num].get_msg_type()
-                        
+                        if msg_type == 32 :
+                            msg_info['local_teid'] = self.messages[num].get_fteid()
+                       
+                                              
                         if not message_queue.has_key(ip_str) or \
                             not message_queue[ip_str ].has_key(msg_type):
                             message_queue[ip_str][msg_type] = [msg_info]
