@@ -26,7 +26,7 @@ GTPResponse2Request = {
 
 GTPRequest2Response = {
     1: 2,
-    32: 333,
+    32: 33,
     34: 35,
     36: 37,
     38: 39, 

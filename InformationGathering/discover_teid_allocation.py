@@ -45,25 +45,35 @@ def main(argv=None):
 
     program_license = "Copyright 2017 Rosalia d'Alessandro\
                 Licensed under the Apache License 2.0\
-                nhttp://www.apache.org/licenses/LICENSE-2.0"
+                http://www.apache.org/licenses/LICENSE-2.0"
 
     if argv is None:
         argv = sys.argv[1:]
     lstn = None
     try:
         # setup option parser
-        parser = OptionParser(version=program_version_string, description=program_license)
-        parser.add_option("-v", "--verbose", dest="verbose", action="count", help="set verbosity level [default: %default]")
+        parser = OptionParser(version = program_version_string, 
+                description = program_license)
+        
+        parser.add_option("-v", "--verbose", dest = "verbose", action = "count", 
+                help = "Set verbosity level [default: %default]")
 
-        parser.add_option("-c", "--config", dest="config_file", help="the configuration file")
-        parser.add_option("-r", "--remote_net", dest="remote_net", 
-                          help="remote network e.g. 10.0.0.0/24, 10.0.0.1/32") 
+        parser.add_option("-c", "--config", dest = "config_file", 
+                help = "Configuration file")
+        
+        parser.add_option("-r", "--remote_net", dest = "remote_net", 
+                help = "Remote network e.g. 10.0.0.0/24, 10.0.0.1/32") 
+        
         parser.add_option("-l", "--listening", dest = "listening_mode", 
-                          action = "count", help = "start also a GTP_C listener")       
+                action = "count", help = "Start also a GTP_C listener")       
+        
+        parser.add_option("-o", "--output", dest = "output_file", 
+                help = "Output file") 
         
         # set defaults
-        parser.set_defaults(listening_mode=False, config_file="../config/EchoRequest.cnf", 
-                            verbose = False)
+        parser.set_defaults(listening_mode = False, verbose = False,
+                    config_file = "../config/TeidDiscover.cnf",
+                    output_file = "")
 
         # process options
         (opts, args) = parser.parse_args(argv)
@@ -78,6 +88,7 @@ def main(argv=None):
         if listening_mode and  remote_net == None:
             print "remote network (e.g. 10.0.0.0/24, 10.0.0.1/32) is required"
             return
+        
         # MAIN BODY #
         if opts.config_file == "" :
             print "Error: missed config file"
@@ -96,13 +107,19 @@ def main(argv=None):
             lstn.join()
             lstn.stop()
         print "Sent %d GTPV2 messages"%len(message_queue)
+        fd = None
         if not listening_mode :
             return
+        if opts.output_file != "" :
+            fd = open('opts.output_file ', 'w')
         for key, value in message_queue.items():
             for k, v in value:
                 if v['reply'] == 1:
                     print "%s implements a GTP v2 stack"%key
-                    print "%d msg type teid %d"%(k, v['remote_teid'])       
+                    print "%d msg type teid %d"%(k, v['remote_teid'])    
+                    if fd :
+                        fd.write("%s implements a GTP v2 stack"%key)   
+                        fd.write("%d msg type teid %d"%(k, v['remote_teid']))
     except Exception, e:
         indent = len(program_name) * " "
         sys.stderr.write(program_name + ": " + repr(e) + "\n")

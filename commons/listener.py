@@ -8,7 +8,7 @@ import errno, sys
 import struct
 from socket import socket, timeout, error
 
-from gtp_v2_core.commons.gtp_v2_commons import GTPmessageTypeStr
+from gtp_v2_core.commons.gtp_v2_commons import GTPmessageTypeStr, GTPmessageTypeDigit
 
 from commons.globals import message_queue, GTPResponse2Request
 from gtp_v2_core.utilities.utilities import logNormal, logErr, logOk , logWarn
@@ -83,7 +83,9 @@ class Listener(threading.Thread):
                     logWarn("Received response to sent msg %d from ip %s"%(
                         GTPmessageTypeStr[req_msg_type], addr[0]), 
                             verbose = self.is_verbose, TAG = self.TAG_NAME) 
-                    if req_msg_type != 32 :
+                    if req_msg_type != GTPmessageTypeDigit["create-session-request"] \
+                        or req_msg_type != GTPmessageTypeDigit["modify-bearer-request"] \
+                        or req_msg_type != GTPmessageTypeDigit["create-bearer-request"]:
                         continue
                     if message_queue[addr[0]][req_msg_type]['local_teid'] != \
                         sequence_or_teid :

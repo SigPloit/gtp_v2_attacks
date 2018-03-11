@@ -1,0 +1,56 @@
+##  Begins of GENERIC SECTION  ##
+ 
+[GENERIC]
+	#Possible supported values: 
+	# 0: S1-U eNB GTP-U interface
+	# 1: S1-U SGW GTP-U interface
+	# 4: S5/S8 SGW GTP-U interface
+	# 5: S5/S8 PGW GTP-U interface
+	# 6: S5/S8 SGW GTP-C interface
+	# 7: S5/S8 PGW GTP-C interface
+	# 10: S11 MME GTP-C interface
+	# 11: S4/S11 SGW GTP-C interface
+
+	interface = 7
+
+
+
+	#List of path management message's types. 
+    # 1: "echo-request",
+    # 2: "echo-response",	
+	base_message_list = 
+	
+	#List of 3gpp message's types
+	#32 for c-plane TEID
+	#34 modify-bearer-request for u-plane TEID
+	#95 create-bearer-request for u-plane TEID
+	3gpp_messages_list = 32,
+	 
+	#sr-dl-ade.be-secure.it (163.162.22.120)
+    source_ip = 127.0.0.1
+    
+    #teid can be a list of teids
+    teid = 0x00000000,
+    #sqn can be a list of sqns. each sqn shall correspond to the relative teid    
+    sqn = 0x00000000,
+    
+##  Begins of IEs SECTION  ## 
+
+[IES]
+    ebi = 5
+    
+#needed only by create session request
+    imsi = 222885500003199
+    mcc = 222
+    mnc = 88
+    lac = 2788
+    rac = 1
+    apn = wap.tim.it
+    gsn= 127.0.0.1
+    msisdn = 393282270202
+    geo_type = 0 
+    imei= 3518280450609004
+    rat_type = E-UTRAN
+    primary_dns = 127.0.0.1
+    secondary_dns = 127.0.0.1    
+
