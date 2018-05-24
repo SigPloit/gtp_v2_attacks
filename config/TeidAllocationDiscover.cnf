@@ -14,19 +14,19 @@
 	interface = 7
 
 
-
+    
 	#List of path management message's types. 
     # 1: "echo-request",
     # 2: "echo-response",	
 	base_message_list = 
 	
 	#List of 3gpp message's types
-	#32 for c-plane TEID
+	#32 create-session-request for c-plane TEID (default)
 	#34 modify-bearer-request for u-plane TEID
 	#95 create-bearer-request for u-plane TEID
+	
 	3gpp_messages_list = 32,
 	 
-	#sr-dl-ade.be-secure.it (163.162.22.120)
     source_ip = 127.0.0.1
     
     #teid can be a list of teids

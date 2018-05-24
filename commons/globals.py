@@ -4,7 +4,7 @@ Created on 24 Jan 2018
 @author: lia
 '''
 
-GTP_C_PORT = 2123
+#GTP_C_PORT = 2123
 
 #global variable needed to manage request/response pair
 message_queue = {}

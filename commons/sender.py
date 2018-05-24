@@ -9,14 +9,14 @@ import time
 from IPy import IP
 from gtp_v2_core.utilities.utilities import logNormal, logErr, logOk 
 
-from commons.globals import GTP_C_PORT, message_queue
+from commons.globals import message_queue
 
 class Sender(threading.Thread):
     '''
     classdocs
     '''
     def __init__(self, messages, peers, start_time=None, isVerbose = False, 
-                 msg_freq=1, wait_time=20):
+                 msg_freq=1, wait_time=20, gtp_port = 2123):
         threading.Thread.__init__(self)
         
         self.TAG_NAME = 'GTP SENDER'
@@ -29,7 +29,7 @@ class Sender(threading.Thread):
         #self.connection.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         
         self.is_verbose = isVerbose
-        
+        #self.is_verbose = True
         if not isinstance(messages, list):
             self.messages = [messages]
         else:
@@ -39,6 +39,8 @@ class Sender(threading.Thread):
         self.msg_freq = msg_freq
         self.wait_time = wait_time
         self.peers = IP(peers)
+        self.gtp_port = gtp_port
+        
         
     ##
     ## @brief      Determines if the thread is running
@@ -57,7 +59,7 @@ class Sender(threading.Thread):
     ##
     def run(self):
         self.is_running = True
- 
+        
         logNormal("--: Acting as SENDER :--", verbose = self.is_verbose, 
                    TAG = self.TAG_NAME)
                 
@@ -88,20 +90,22 @@ class Sender(threading.Thread):
                 for ip in self.peers:
                     try: 
                         ip_str = ip.strNormal()
+                                              
                         msg_info = {'reply' : 0} 
                         msg_type = self.messages[num].get_msg_type()
                         if msg_type == 32 :
                             msg_info['local_teid'] = self.messages[num].get_fteid()
                        
-                                              
                         if not message_queue.has_key(ip_str) or \
-                            not message_queue[ip_str ].has_key(msg_type):
+                            not message_queue[ip_str].has_key(msg_type):
+                            message_queue[ip_str] = {} 
                             message_queue[ip_str][msg_type] = [msg_info]
                         else:
                             message_queue[ip_str][msg_type].extend(
                                 msg_info) 
-                                           
-                        sent_bytes = self.sock.sendto(data, (ip_str, GTP_C_PORT))
+                      
+                        sent_bytes = self.sock.sendto(data, (ip_str, 
+                                                             self.gtp_port))
                         
                         if sent_bytes is not None and sent_bytes > 0:
                             info_msg = "Bytes sent to %s %d"%(ip_str, sent_bytes)
@@ -133,7 +137,7 @@ class Sender(threading.Thread):
                             break                         
                         pass
                     except Exception, e:
-                        logErr("%s GENERIC ERROR : %s"%(ip_str, e), 
+                        logErr("%s GENERIC ERROR : reason %s"%(ip_str, e), 
                             TAG = self.TAG_NAME)                         
                         break                                 
                 curr_count += 1

