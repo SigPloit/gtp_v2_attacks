@@ -33,7 +33,7 @@
     teid = 0x00000000,
     #sqn can be a list of sqns. each sqn shall correspond to the relative teid    
     sqn = 0x00000000,
-    
+    num_msg = 10
 ##  Begins of IEs SECTION  ## 
 
 [IES]

@@ -15,7 +15,7 @@ class Sender(threading.Thread):
     '''
     classdocs
     '''
-    def __init__(self, messages, peers, start_time=None, isVerbose = False, 
+    def __init__(self, sock, messages, peers, start_time=None, isVerbose = False, 
                  msg_freq=1, wait_time=20, gtp_port = 2123):
         threading.Thread.__init__(self)
         
@@ -24,12 +24,13 @@ class Sender(threading.Thread):
         if messages is None or len(messages) == 0 :
             raise Exception("%s :: no messages" % (self.TAG_NAME))             
         
-        self.sock = socket(AF_INET, SOCK_DGRAM)
+        #self.sock = socket(AF_INET, SOCK_DGRAM)
+        self.sock = sock
 
         #self.connection.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         
         self.is_verbose = isVerbose
-        #self.is_verbose = True
+        
         if not isinstance(messages, list):
             self.messages = [messages]
         else:
@@ -101,12 +102,12 @@ class Sender(threading.Thread):
                             message_queue[ip_str] = {} 
                             message_queue[ip_str][msg_type] = [msg_info]
                         else:
-                            message_queue[ip_str][msg_type].extend(
+                            message_queue[ip_str][msg_type].append(
                                 msg_info) 
-                      
+                  
                         sent_bytes = self.sock.sendto(data, (ip_str, 
                                                              self.gtp_port))
-                        
+                                                
                         if sent_bytes is not None and sent_bytes > 0:
                             info_msg = "Bytes sent to %s %d"%(ip_str, sent_bytes)
                         else:

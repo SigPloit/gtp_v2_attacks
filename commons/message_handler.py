@@ -25,10 +25,10 @@ class MessageHandler(threading.Thread):
         self.messages = messages
         self.is_listening = listening_mode
         self.gtp_port = port
-        if self.is_listening:
-            self.sock = socket(AF_INET, SOCK_DGRAM)
-            self.sock.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-            self.sock.bind(('0.0.0.0', self.gtp_port))
+        
+        self.sock = socket(AF_INET, SOCK_DGRAM)
+        self.sock.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
+        self.sock.bind(('0.0.0.0', self.gtp_port))
 
         self.msgs_freq = msgs_freq
         self.wait_time = wait_time
@@ -70,10 +70,11 @@ class MessageHandler(threading.Thread):
         if self.is_verbose : 
             print "starting the sender ...."
         ''' START Sender'''        
-        self.sender= Sender(messages = self.messages, peers = self.peer, 
-                                isVerbose = self.is_verbose, msg_freq= self.msgs_freq, 
-                                wait_time= self.wait_time, gtp_port = self.gtp_port
-                                )
+        self.sender= Sender(sock = self.sock, messages = self.messages, 
+                            peers = self.peer, isVerbose = self.is_verbose, 
+                            msg_freq= self.msgs_freq, 
+                            wait_time= self.wait_time, gtp_port = self.gtp_port
+                            )
         self.sender_daemon = True
         self.sender.start()               
         self.sender.join()
@@ -86,12 +87,12 @@ class MessageHandler(threading.Thread):
     ## @param      self  refers to the class itself
     ##
     def stop(self):
+               
+        if self.sender:
+            self.sender.stop()    
         
         if self.listener:
-            self.listener.stop()
-        
-        if self.sender:
-            self.sender.stop()          
+            self.listener.stop()                  
         
         if self.sock:   
             self.sock.close()

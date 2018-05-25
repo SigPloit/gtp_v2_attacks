@@ -57,7 +57,7 @@ DEBUG = 0
 ## This script can be used to test Fraud scenario, replacing the legitimate S-GW 
 ## with a malicious S-GW able to send GTP-U traffic on the behalf of the user
 ## victim.
-##  Prerequirement: TEID of the tunnel assigned to the victim user shall be 
+##  Pre-requirement: TEID of the tunnel assigned to the victim user shall be 
 ##  known and provided and provided in the config file.
 ## 
 ## Use the -h option to enter the help menu and determine what to do.
@@ -143,7 +143,7 @@ def main(argv=None):
             for k, v in value:
                 if v['reply'] == 1:
                     print "%s implements a GTP v2 stack"%key
-                    print "%d msg type teid %d"%(k, v['remote_teid'])    
+                    print "%d msg type; new teid proposed %d"%(k, v['remote_teid'])    
    
     except Exception, e:
         indent = len(program_name) * " "

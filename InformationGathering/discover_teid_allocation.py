@@ -62,10 +62,12 @@ DEBUG = 0
 ## Use the -h option to enter the help menu and determine what to do.
 ## 
 ## Basic usage examples:
-##      * $ python discover_teid_allocation.py -v -c conf_file.cnf [-c conf2.cnf ...] -r <remote ip> 
+##      * $ python discover_teid_allocation.py -v -c conf_file.cnf [-c conf2.cnf ...] 
+##        -r <remote ip> -n <num messages> 
 #            act as a client connecting to <remote-host-ip>
 ##      
-##      * $ python discover_teid_allocation.py -lv  -c conf_file.cnf [-c conf2.cnf ...] -r <remote ip>
+##      * $ python discover_teid_allocation.py -lv  -c conf_file.cnf [-c conf2.cnf ...] 
+##        -r <remote ip> -n <num messages> 
 ##      
 ##           act as a server listening on 0.0.0.0 and accepting replies from <remote-host-ip>
 ##
@@ -95,7 +97,7 @@ def main(argv=None):
                 help = "Set verbosity level [default: %default]")
 
         parser.add_option("-c", "--config", dest = "config_file", 
-                help = "Configuration file")
+                help = "Configuration file [default: %default]")
         
         parser.add_option("-r", "--remote_net", dest = "remote_net", 
                 help = "Remote network e.g. 10.0.0.0/24, 10.0.0.1/32") 
@@ -105,6 +107,9 @@ def main(argv=None):
         
         parser.add_option("-o", "--output", dest = "output_file", 
                 help = "Output file") 
+
+#         parser.add_option("-n", "--num_msg", dest = "num_msg", 
+#                 help = "Num of messages")        
         
         # set defaults
         parser.set_defaults(listening_mode = True, verbose = False,
@@ -113,9 +118,9 @@ def main(argv=None):
 
         # process options
         (opts, args) = parser.parse_args(argv)
-        is_verbose = False
+        is_verbose = opts.verbose
         listening_mode = opts.listening_mode
-          
+         
 
         msg_freq = DEFAULT_SLEEPTIME
         remote_net = opts.remote_net
@@ -126,13 +131,18 @@ def main(argv=None):
             return
         
         # MAIN BODY #
-        if opts.config_file == "" :
+        if opts.config_file is None or  opts.config_file == "" :
             print "Error: missed config file"
             return            
-  
+# 
+#         if opts.num_msg is None or opts.num_msg == "" or int(opts.num_msg) == 0 :
+#             print "Error: missed num of messages to send"
+#             return 
+          
         config = parseConfigs(opts.config_file)
  
         msgs = config.get_unpacked_messages()
+
        
         lstn = MessageHandler(messages = msgs, peer = remote_net, 
                               isVerbose = is_verbose, listening_mode = listening_mode,
@@ -142,20 +152,26 @@ def main(argv=None):
             lstn.start()
             lstn.join()
             lstn.stop()
-        print "Sent %d GTPV2 messages"%len(message_queue)
+            
+        print "Sent %d GTPV2 messages"%len(msgs)
+        print message_queue
+        
         fd = None
         if not listening_mode :
             return
+
         if opts.output_file != "" :
             fd = open('opts.output_file ', 'w')
+                       
         for key, value in message_queue.items():
-            for k, v in value:
-                if v['reply'] == 1:
-                    print "%s implements a GTP v2 stack"%key
-                    print "%d msg type teid %d"%(k, v['remote_teid'])    
-                    if fd :
-                        fd.write("%s implements a GTP v2 stack"%key)   
-                        fd.write("%d msg type teid %d"%(k, v['remote_teid']))
+            for k,v in value.items():              
+                for i in v :
+                    if i['reply'] == 1:
+                        print "%s implements a GTP v2 stack"%key
+                        print "%d msg type teid %s"%(k, i['remote_teid'])    
+                        if fd :
+                            fd.write("%s implements a GTP v2 stack"%key)   
+                            fd.write("for %d msg type created teid %s"%(k, i['remote_teid']))                        
     except Exception, e:
         indent = len(program_name) * " "
         sys.stderr.write(program_name + ": " + repr(e) + "\n")
