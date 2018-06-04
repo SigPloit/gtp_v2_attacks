@@ -91,7 +91,8 @@ class Listener(threading.Thread):
                         message_queue[addr[0]][req_msg_type][0]['reply'] = 1
                     else:
                         for elem in message_queue[addr[0]][req_msg_type]:
-                            if elem['local_teid'] ==  sequence_or_teid :     
+                            if elem.has_key('local_teid') and \
+                                elem['local_teid'] ==  sequence_or_teid :     
                                 elem['reply'] = 1
                                 elem['remote_teid'] = self.__getFTEID(data[12:])
                                 break

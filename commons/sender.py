@@ -94,7 +94,7 @@ class Sender(threading.Thread):
                                               
                         msg_info = {'reply' : 0} 
                         msg_type = self.messages[num].get_msg_type()
-                        if msg_type == 32 :
+                        if msg_type == 32 or msg_type == 34:
                             msg_info['local_teid'] = self.messages[num].get_fteid()
                        
                         if not message_queue.has_key(ip_str) or \

@@ -101,7 +101,7 @@ def main(argv=None):
         
         # set defaults
         parser.set_defaults(listening_mode=False, 
-                            config_file="../config/GTPNodesDiscovery.cnf", 
+                            config_file="../config/GTPEchoNodesDiscovery.cnf", 
                             verbose = 0)
 
         # process options

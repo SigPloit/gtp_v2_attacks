@@ -14,25 +14,24 @@
 	interface = 7
 
 
-    
-	#List of path management message's types. 
-    # 1: "echo-request",
-    # 2: "echo-response",	
-	base_message_list = 
-	
 	#List of 3gpp message's types
 	#32 create-session-request for c-plane TEID (default)
 	#34 modify-bearer-request for u-plane TEID
 	#95 create-bearer-request for u-plane TEID
 	
+	#integer value followed by comma
 	3gpp_messages_list = 32,
 	 
     source_ip = 127.0.0.1
     
     #teid can be a list of teids
+    #hex value followed by comma    
     teid = 0x00000000,
-    #sqn can be a list of sqns. each sqn shall correspond to the relative teid    
+    
+    #sqn can be a list of sqns. each sqn shall correspond to the relative teid
+    #hex value followed by comma    
     sqn = 0x00000000,
+    
     num_msg = 10
 ##  Begins of IEs SECTION  ## 
 

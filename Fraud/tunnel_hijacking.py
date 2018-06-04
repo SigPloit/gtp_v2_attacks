@@ -139,12 +139,14 @@ def main(argv=None):
         if not listening_mode :
             return
 #Remote TEID represents the new TEID used by the PGW.
+ 
         for key, value in message_queue.items():
-            for k, v in value:
-                if v['reply'] == 1:
-                    print "%s implements a GTP v2 stack"%key
-                    print "%d msg type; new teid proposed %d"%(k, v['remote_teid'])    
-   
+            for k,v in value.items():              
+                for i in v :
+                    if i['reply'] == 1:
+                        print "%s implements a GTP v2 stack"%key
+                        print "%d msg type teid %s"%(k, i['remote_teid'])    
+    
     except Exception, e:
         indent = len(program_name) * " "
         sys.stderr.write(program_name + ": " + repr(e) + "\n")

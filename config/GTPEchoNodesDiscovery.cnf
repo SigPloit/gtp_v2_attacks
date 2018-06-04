@@ -5,4 +5,7 @@
     num_msg = 3
 
 	#List of path management message's types. 
-	base_message_list = 1
+    #integer value followed by comma	
+	base_message_list = 1,
+	
+	num_msg = 1
