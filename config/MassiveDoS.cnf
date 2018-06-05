@@ -33,6 +33,6 @@
     mcc = 222
     mnc = 88
     
-# possible values: 0, 1. Suggested value 0
-    node_id_type = 0  
+# possible values: 0, 2. Suggested value 0
+    node_id_type = 2  
     

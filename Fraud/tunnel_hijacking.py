@@ -38,6 +38,7 @@ from optparse import OptionParser
 from gtp_v2_core.utilities.configuration_parser import parseConfigs
 from commons.message_handler import MessageHandler
 from commons.globals import message_queue
+from gtp_v2_core.commons.gtp_v2_commons import GTPmessageTypeStr
 
 __all__ = []
 __version__ = 0.1
@@ -138,14 +139,18 @@ def main(argv=None):
         print "Sent %d GTPV2 messages"%len(message_queue)
         if not listening_mode :
             return
-#Remote TEID represents the new TEID used by the PGW.
- 
+        #Remote TEID represents the new TEID used by the PGW.
+        printed = False
         for key, value in message_queue.items():
             for k,v in value.items():              
                 for i in v :
                     if i['reply'] == 1:
-                        print "%s implements a GTP v2 stack"%key
-                        print "%d msg type teid %s"%(k, i['remote_teid'])    
+                        if not printed :
+                            print "%s implements a GTP v2 stack"%key
+                            printed = True
+                        print "%s : < local teid %s, remote teid %s>"%(
+                            GTPmessageTypeStr[k], format(i['local_teid'], '#08X'), 
+                            i['remote_teid'])    
     
     except Exception, e:
         indent = len(program_name) * " "

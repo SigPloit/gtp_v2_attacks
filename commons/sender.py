@@ -20,28 +20,26 @@ class Sender(threading.Thread):
         threading.Thread.__init__(self)
         
         self.TAG_NAME = 'GTP SENDER'
+        self.is_verbose = isVerbose        
+    
         
-        if messages is None or len(messages) == 0 :
-            raise Exception("%s :: no messages" % (self.TAG_NAME))             
-        
-        #self.sock = socket(AF_INET, SOCK_DGRAM)
         self.sock = sock
 
-        #self.connection.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        
-        self.is_verbose = isVerbose
-        
-        if not isinstance(messages, list):
-            self.messages = [messages]
-        else:
-            self.messages = messages
 
         self.start_time = start_time
         self.msg_freq = msg_freq
         self.wait_time = wait_time
         self.peers = IP(peers)
         self.gtp_port = gtp_port
-        
+        self.messages = []
+        if messages is None or len(messages) == 0 :
+            logErr("no messages", TAG = self.TAG_NAME)
+            return       
+         
+        if not isinstance(messages, list):
+            self.messages = [messages]
+        else:
+            self.messages = messages       
         
     ##
     ## @brief      Determines if the thread is running
@@ -92,7 +90,7 @@ class Sender(threading.Thread):
                     try: 
                         ip_str = ip.strNormal()
                                               
-                        msg_info = {'reply' : 0} 
+                        msg_info = {'reply' : 0}
                         msg_type = self.messages[num].get_msg_type()
                         if msg_type == 32 or msg_type == 34:
                             msg_info['local_teid'] = self.messages[num].get_fteid()

@@ -36,7 +36,7 @@ import os
 import sys
 from optparse import OptionParser
 from gtp_v2_core.utilities.configuration_parser import parseConfigs
-
+from gtp_v2_core.commons.gtp_v2_commons import GTPmessageTypeStr
 from commons.message_handler import MessageHandler
 
 from commons.globals import message_queue
@@ -154,7 +154,6 @@ def main(argv=None):
             lstn.stop()
             
         print "Sent %d GTPV2 messages"%len(msgs)
-        print message_queue
         
         fd = None
         if not listening_mode :
@@ -162,13 +161,17 @@ def main(argv=None):
 
         if opts.output_file != "" :
             fd = open('opts.output_file ', 'w')
-                       
+        printed = False              
         for key, value in message_queue.items():
             for k,v in value.items():              
                 for i in v :
                     if i['reply'] == 1:
-                        print "%s implements a GTP v2 stack"%key
-                        print "%d msg type teid %s"%(k, i['remote_teid'])    
+                        if not printed :
+                            print "%s implements a GTP v2 stack"%key
+                            printed = True
+                        print "%s : < local teid %s, remote teid %s>"%(
+                            GTPmessageTypeStr[k], format(i['local_teid'], '#08X'), 
+                            i['remote_teid'])    
                         if fd :
                             fd.write("%s implements a GTP v2 stack"%key)   
                             fd.write("for %d msg type created teid %s"%(k, i['remote_teid']))                        
