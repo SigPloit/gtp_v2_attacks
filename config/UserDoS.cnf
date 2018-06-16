@@ -33,7 +33,7 @@
 ##  Begins of IEs SECTION  ## 
 
 [IES]
-    mcc = 222
+    mcc = 333
     mnc = 88
     lac = 2788
     rac = 1

@@ -11,7 +11,7 @@
 	# 10: S11 MME GTP-C interface
 	# 11: S4/S11 SGW GTP-C interface
 
-	interface = 7
+	interface = 6
 
     #possible message to use
     # 101: "delete PDN connection set request"  

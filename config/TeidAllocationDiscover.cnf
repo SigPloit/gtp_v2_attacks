@@ -11,13 +11,13 @@
 	# 10: S11 MME GTP-C interface
 	# 11: S4/S11 SGW GTP-C interface
 
-	interface = 7
+	interface = 6
 
 
 	#List of 3gpp message's types
-	#32 create-session-request for c-plane TEID (default)
-	#34 modify-bearer-request for u-plane TEID
-	#95 create-bearer-request for u-plane TEID
+	#32 create-session-request for discovering c-plane TEID (default)
+	#34 modify-bearer-request for discovering u-plane TEID
+	#95 create-bearer-request for discovering u-plane TEID
 	
 	#integer value followed by comma
 	3gpp_messages_list = 32,
@@ -39,17 +39,18 @@
     ebi = 5
     
 #needed only by create session request
-    imsi = 222885500003199
-    mcc = 222
+    imsi = 333885500003199
+    mcc = 333
     mnc = 88
     lac = 2788
     rac = 1
-    apn = wap.tim.it
+    apn = abc
     gsn= 127.0.0.1
-    msisdn = 393282270202
+    msisdn = 333282270202
     geo_type = 0 
     imei= 3518280450609004
     rat_type = E-UTRAN
     primary_dns = 127.0.0.1
     secondary_dns = 127.0.0.1    
+    recovery = 0
 

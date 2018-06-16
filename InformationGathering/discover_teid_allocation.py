@@ -160,7 +160,7 @@ def main(argv=None):
             return
 
         if opts.output_file != "" :
-            fd = open('opts.output_file ', 'w')
+            fd = open(opts.output_file, 'w')
         printed = False              
         for key, value in message_queue.items():
             for k,v in value.items():              
