@@ -35,7 +35,8 @@
 import os
 import sys
 from optparse import OptionParser
-from gtp_v2_core.utilities.teid_predictability_index import TeidPredictabilityIndex
+from gtp_v2_core.utilities.teid_predictability import TeidPredictabilityIndex,\
+    TeidFixedPart
 
 __all__ = []
 __version__ = 0.1
@@ -111,6 +112,17 @@ def main(argv=None):
         tpi = TeidPredictabilityIndex()
         index, msg = tpi.teidPredictabilityIndex(teids)
         print ("%d, %s")%(index, msg)
+        tcp = TeidFixedPart()
+        teids_hex = [hex(t) for t in teids]
+
+        common_prefixes = tcp.teidFixedPart(teids_hex)
+        if common_prefixes != [] :
+            print "The algorithm seems to use a number of bits less than 32 for",\
+                   "TEID generation."
+            print common_prefixes
+        else :
+                print ("The algorithm seems to use a all 32 bits for",
+                   "TEID generation.")          
        
     except Exception, e:
         indent = len(program_name) * " "
