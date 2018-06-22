@@ -79,7 +79,7 @@ class Listener(threading.Thread):
                     req_msg_type = GTPResponse2Request[resp_msg_type]
 
                     if not message_queue[addr[0]].has_key(req_msg_type):
-                        logWarn("Unsolicites response msg %d"%(resp_msg_type),
+                        logWarn("Unsolicited response msg %d"%(resp_msg_type),
                                 verbose = self.is_verbose, TAG = self.TAG_NAME) 
                         continue
                     

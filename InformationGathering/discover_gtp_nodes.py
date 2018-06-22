@@ -138,7 +138,7 @@ def main(argv=None):
             lstn.start()
             lstn.join()
             lstn.stop()
-        print "Sent %d GTPV%d messages"%(len(message_queue), config.get_version())
+        print "Sent %d GTPV2 messages"%(len(message_queue))
         if not listening_mode :
             return
         count = 0
