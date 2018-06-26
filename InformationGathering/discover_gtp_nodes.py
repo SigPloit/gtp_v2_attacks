@@ -141,18 +141,22 @@ def main(argv=None):
         print "Sent %d GTPV2 messages"%(len(message_queue))
         if not listening_mode :
             return
-        count = 0
+        gtp_nodes = []
         for key, value in message_queue.items():
             for k,v in value.items():               
                 for i in v :
                     if i['reply'] == 1:
-                        print "%s implements a GTP v2 stack"%key
-                        count += 1
+                        gtp_nodes.append(key)
                         break
-        if count > 0 :
-            print "Found in total %d targets implemeting a GTP v2 stack"%count
+        
+        num_gtp_nodes = len(gtp_nodes)
+        if num_gtp_nodes > 0 :
+            print "Found in total %d targets implemeting a GTPv2 stack"%num_gtp_nodes
+            print "List of discovered GTPv2 nodes"
+            for n in gtp_nodes :
+                print n,"\n"
         else :
-            print "Not found targets implemeting a GTP v2 stack"        
+            print "Not found targets implementing a GTPv2 stack"        
     except Exception, e:
         indent = len(program_name) * " "
         sys.stderr.write(program_name + ": " + repr(e) + "\n")

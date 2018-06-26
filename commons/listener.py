@@ -68,7 +68,7 @@ class Listener(threading.Thread):
                     (flags, resp_msg_type, length, sequence_or_teid) = struct.unpack("!BBHL", 
                                                                 data[:8])
                     version = flags & 0xF0 
-                    if version != 0x40 and version != 0x10:
+                    if version != 0x40:
                         logWarn("Unsupported GTP version %02x"%(version), 
                                 verbose = self.is_verbose, TAG = self.TAG_NAME)
                         continue
